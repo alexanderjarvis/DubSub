@@ -6,7 +6,6 @@ import akka.cluster.ClusterEvent._
 import akka.cluster.Member
 import akka.cluster.MemberStatus
 import akka.event.Logging
-
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.Set
 import scala.util.Random
@@ -22,6 +21,11 @@ class DubSub extends Actor with ActorLogging {
 
   val localSubscriptions = new HashMap[String, Set[ActorRef]]()
   val hubSubscriptions = new HashMap[String, Set[ActorRef]]()
+
+  var synced = false
+  var syncWatch = IndexedSeq.empty[ActorRef]
+
+  def dubsub(member: Member) = context.actorFor(RootActorPath(member.address) / "user" / "DubSub")
 
   def receive = {
     case Subscribe(channel) => {
@@ -40,28 +44,38 @@ class DubSub extends Actor with ActorLogging {
     }
 
     // ---- Hub Specific ----
-    case HubSubscribe(channel) => {
-      subscribe(channel, hubSubscriptions)
+    case HubSubscribe(channel) => subscribe(channel, hubSubscriptions)
+    case HubUnsubscribe(channel) => unsubscribe(channel, hubSubscriptions)
+    case HubPublish(channel, message) => publishLocal(channel, message)
+    case HubSubscriptions => {
+      log.info("Sending subscriptions")
+      sender ! HubSubscriptions(hubSubscriptions.toMap)
     }
-    case HubUnsubscribe(channel) => {
-      unsubscribe(channel, hubSubscriptions)
+    case HubSubscriptions(subs) => {
+      if (synced) {
+        log.info("Already synced")
+      } else {
+        synced = true
+        log.info("Syncing subscriptions")
+        hubSubscriptions ++= subs // todo: merge maps
+        syncWatch foreach ( _ ! HubSynced )
+      }
     }
-    case HubPublish(channel, message) => {
-      publishLocal(channel, message)
+    case HubSynced => {
+      context watch sender
+      syncWatch = syncWatch :+ sender
+      if (synced) sender ! HubSynced
     }
-    case HubSubscriptions => sender ! HubSubscriptions(hubSubscriptions.toMap)
-    case HubSubscriptions(subs) => hubSubscriptions ++= subs
 
     // ---- Cluster Specific ----
     case state: CurrentClusterState => {
+      synced = false
       val upMembers = state.members.filter(_.status == MemberStatus.Up)
       upMembers foreach register
-
-      // ask for hub subscriptions
-      val upMembersSeq = upMembers.toIndexedSeq
-      if (upMembersSeq.length > 0) {
-        val member = upMembersSeq(Random.nextInt(upMembersSeq.length) % upMembersSeq.length)
-        context.actorFor(RootActorPath(member.address) / "user" / "DubSub") ! HubSubscriptions
+      val otherMembers = upMembers.filterNot(_.address == self.path.address).toIndexedSeq
+      if (otherMembers.length > 0) {
+        val member = otherMembers(Random.nextInt(otherMembers.length) % otherMembers.length)
+        dubsub(member) ! HubSubscriptions
       }
     }
     case MemberUp(member) => register(member)
@@ -69,6 +83,7 @@ class DubSub extends Actor with ActorLogging {
       context watch sender
       hubs = hubs :+ sender
       log.info("(" + hubs.size + ") nodes in DubSub cluster")
+      if (!synced && sender != self) sender ! HubSubscriptions
     }
     case Terminated(a) => {
       hubs = hubs.filterNot(_ == a)
@@ -78,23 +93,19 @@ class DubSub extends Actor with ActorLogging {
       log.info("(" + hubs.size + ") nodes in DubSub cluster")
     }
     case _: ClusterDomainEvent => // ignore
-    case _ => log.info("received unknown message")
+    case _ => log.error("received unknown message")
   }
 
-  def register(member: Member) = {
-    context.actorFor(RootActorPath(member.address) / "user" / "DubSub") ! HubRegistration
+  private def register(member: Member) {
+    dubsub(member) ! HubRegistration
   }
 
   private def publishLocal(channel: String, message: String) {
-    localSubscriptions.get(channel).map(_.foreach { subscriber =>
-      subscriber ! Publish(channel, message)
-    }).getOrElse(log.debug("publish to 0 local subscribers"))
+    localSubscriptions.get(channel).map(_.foreach(sub => sub ! Publish(channel, message)))
   }
 
   private def publishHubs(channel: String, message: String) {
-    hubSubscriptions.get(channel).map(_.filterNot(_ == self).foreach {
-      hub => hub ! HubPublish(channel, message)
-    }).getOrElse(log.debug("publish to 0 remote subscribers"))
+    hubSubscriptions.get(channel).map(_.filterNot(_ == self).foreach(hub => hub ! HubPublish(channel, message)))
   }
 
   private def subscribe(channel: String, subscriptions: HashMap[String, Set[ActorRef]]) {
@@ -120,3 +131,4 @@ private case class HubPublish(channel: String, message: String)
 
 private case object HubSubscriptions
 private case class HubSubscriptions(subscriptions: Map[String, Set[ActorRef]])
+case object HubSynced
