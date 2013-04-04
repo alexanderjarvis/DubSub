@@ -16,7 +16,7 @@ Consider the following example:
 
 ![Typical PubSub](images/typical-pubsub.png)
 
-Publishing a message takes two network hops to get from the second node to the first node and because all messages are routed via the Pubslish-Subscribe server, this can become a bottleneck.
+Publishing a message takes two network hops to get from the second node to the first node and because all messages are routed via the Publish-Subscribe server, this can become a bottleneck.
 
 ## DubSub
 
@@ -70,7 +70,17 @@ To get started on writing Akka actors, please read through the documentation at 
 
 ##### Optional
 
-Set the address of the seed-nodes as a runtime, or configuration property (this defaults to 127.0.0.1:2551 and 127.0.0.1:2552 in the reference.conf).
+You can specify the seed-nodes of the cluster in your application.conf:
 
-	-Ddubsub.akka.cluster.seed-nodes=["akka://DubSubSystem@192.168.0.1:2551"]
+```
+dubsub {
+  akka {
+    cluster {
+      seed-nodes = [
+        "akka://DubSubSystem@127.0.0.1:2551",
+        "akka://DubSubSystem@127.0.0.1:2552"]
+    }
+  }
+}
+```
 
