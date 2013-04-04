@@ -31,7 +31,7 @@ class DubSub extends Actor with ActorLogging {
 
   var hubs = IndexedSeq.empty[ActorRef]
 
-  override def preStart(): Unit = cluster.subscribe(self, classOf[ClusterDomainEvent])
+  override def preStart(): Unit = cluster.subscribe(self, classOf[MemberUp])
   override def postStop(): Unit = cluster.unsubscribe(self)
 
   val localSubscriptions = new HashMap[String, Set[ActorRef]]()
@@ -107,7 +107,6 @@ class DubSub extends Actor with ActorLogging {
       }
       log.info("(" + hubs.size + ") nodes in DubSub cluster")
     }
-    case _: ClusterDomainEvent => // ignore
     case _ => log.error("received unknown message")
   }
 
