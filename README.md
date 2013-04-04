@@ -37,7 +37,7 @@ There is a [Play plugin](https://github.com/alexanderjarvis/Play-DubSub) availab
 
 Add DubSub to your project in Build.scala
 
-```
+```scala
 libraryDependencies += "uk.co.panaxiom" % "dubsub" % "0.1-SNAPSHOT"
 
 resolvers += Resolver.url("Alex's GitHub Repository", url("http://alexanderjarvis.github.com/snapshots/"))(Resolver.ivyStylePatterns)
@@ -45,7 +45,7 @@ resolvers += Resolver.url("Alex's GitHub Repository", url("http://alexanderjarvi
 
 On application startup, create the DubSub ActorSystem and create a DubSub actor.
 
-```
+```scala
 val system = ActorSystem("DubSubSystem", config.getConfig("dubsub"))
 system.actorOf(Props[DubSub], "DubSub")
 ```
@@ -56,7 +56,7 @@ Set the remote port of at least your first seed node as a runtime property (or i
 
 Send Publish, Subscribe and Unsubscribe messages from *any* node in your cluster and watch DubSub work seamlessly.
 
-```
+```scala
 val dubsub = system.actorFor("/user/DubSub")
 
 dubsub ! Subscribe("topic")
