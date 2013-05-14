@@ -9,7 +9,7 @@ object DubSubBuild extends Build {
     name := "dubsub",
     organization := "uk.co.panaxiom",
     version      := "0.1-SNAPSHOT",
-    scalaVersion := "2.10.0",
+    scalaVersion := "2.10.1",
     // make sure that the artifacts don't have the scala version in the name
     crossPaths   := false
   )
@@ -38,17 +38,17 @@ object DubSubBuild extends Build {
   object Dependencies {
     val base = Seq(
       // ---- application dependencies ----
-      "com.typesafe.akka"  %% "akka-actor" % "2.1.2" ,
-      "com.typesafe.akka"  %% "akka-remote" % "2.1.2" ,
-      "com.typesafe.akka"  %% "akka-cluster-experimental" % "2.1.2",
+      "com.typesafe.akka"  %% "akka-actor" % "2.1.4" ,
+      "com.typesafe.akka"  %% "akka-remote" % "2.1.4" ,
+      "com.typesafe.akka"  %% "akka-cluster-experimental" % "2.1.4",
 
       // ---- test dependencies ----
-      "com.typesafe.akka" %% "akka-testkit" % "2.1.2" %
+      "com.typesafe.akka" %% "akka-testkit" % "2.1.4" %
         "test" ,
-      "com.typesafe.akka" %% "akka-remote-tests-experimental" % "2.1.2" %
+      "com.typesafe.akka" %% "akka-remote-tests-experimental" % "2.1.4" %
         "test" ,
       "org.scalatest"     %% "scalatest" % "1.9.1" % "test",
-      "junit"              % "junit" % "4.5" % "test"
+      "junit"              % "junit" % "4.11" % "test"
     )
   }
 

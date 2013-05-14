@@ -84,3 +84,11 @@ dubsub {
 }
 ```
 
+## How to run the tests
+
+DubSub uses the sbt-multi-jvm plugin to perform tests across multiple JVMs and so requires a special command to run the tests:
+
+```
+$ sbt
+> multi-jvm:test
+```
