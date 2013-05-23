@@ -38,17 +38,14 @@ object DubSubBuild extends Build {
   object Dependencies {
     val base = Seq(
       // ---- application dependencies ----
-      "com.typesafe.akka"  %% "akka-actor" % "2.1.4" ,
-      "com.typesafe.akka"  %% "akka-remote" % "2.1.4" ,
-      "com.typesafe.akka"  %% "akka-cluster-experimental" % "2.1.4",
+      "com.typesafe.akka"  %% "akka-actor" % "2.2-M3" ,
+      "com.typesafe.akka"  %% "akka-remote" % "2.2-M3" ,
+      "com.typesafe.akka"  %% "akka-cluster-experimental" % "2.2-M3",
+      "com.typesafe.akka" %% "akka-slf4j" % "2.2-M3",
 
       // ---- test dependencies ----
-      "com.typesafe.akka" %% "akka-testkit" % "2.1.4" %
-        "test" ,
-      "com.typesafe.akka" %% "akka-remote-tests-experimental" % "2.1.4" %
-        "test" ,
-      "org.scalatest"     %% "scalatest" % "1.9.1" % "test",
-      "junit"              % "junit" % "4.11" % "test"
+      "com.typesafe.akka" %% "akka-multi-node-testkit" % "2.2-M3",
+      "org.scalatest"     %% "scalatest" % "1.9.1" % "test"
     )
   }
 

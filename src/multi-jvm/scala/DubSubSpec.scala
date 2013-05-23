@@ -27,25 +27,12 @@ abstract class DubSubSpec extends AbstractDubSubSpec {
   import DubSubSpecConfig._
 
   "startup cluster" in within(15 seconds) {
-    Cluster(system).subscribe(testActor, classOf[MemberUp])
-    expectMsgClass(classOf[CurrentClusterState])
 
-    val firstAddress = node(first).address
-    val secondAddress = node(second).address
-    val thirdAddress = node(third).address
-
-    Cluster(system) join firstAddress
+    Cluster(system) join node(first).address
 
     system.actorOf(Props[DubSub], "DubSub")
 
-    expectMsgAllOf(
-      MemberUp(Member(firstAddress, MemberStatus.Up)),
-      MemberUp(Member(secondAddress, MemberStatus.Up)),
-      MemberUp(Member(thirdAddress, MemberStatus.Up)))
-
-    Cluster(system).unsubscribe(testActor)
-
-    testConductor.enter("all-up")
+    testConductor.enter("all up")
   }
 
   "subscribe" in within(15 seconds) {

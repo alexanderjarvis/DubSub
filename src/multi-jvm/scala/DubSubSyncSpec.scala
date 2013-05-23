@@ -28,30 +28,15 @@ abstract class DubSubSyncSpec extends AbstractDubSubSpec {
 
   "startup cluster" in within(15 seconds) {
 
-    val firstAddress = node(first).address
-    val secondAddress = node(second).address
-
     runOn(first, second) {
-      Cluster(system).subscribe(testActor, classOf[MemberUp])
-      expectMsgClass(classOf[CurrentClusterState])
-
-      Cluster(system) join firstAddress
-
+      Cluster(system) join node(first).address
       system.actorOf(Props[DubSub], "DubSub")
-
-      expectMsgAllOf(
-        MemberUp(Member(firstAddress, MemberStatus.Up)),
-        MemberUp(Member(secondAddress, MemberStatus.Up)))
-
-      Cluster(system).unsubscribe(testActor)
     }
 
     testConductor.enter("first & second up")
   }
 
   "sync subscriptions" in within(30 seconds) {
-    Cluster(system).subscribe(testActor, classOf[MemberUp])
-    expectMsgClass(classOf[CurrentClusterState])
 
     // subscribe on first node
     subscribe(first)
@@ -61,13 +46,6 @@ abstract class DubSubSyncSpec extends AbstractDubSubSpec {
     // bring third node up and publish to first node
     runOn(third) {
       Cluster(system) join node(first).address
-      expectMsgAllOf(
-        MemberUp(Member(node(first).address, MemberStatus.Up)),
-        MemberUp(Member(node(second).address, MemberStatus.Up)),
-        MemberUp(Member(node(third).address, MemberStatus.Up)))
-      runOn(first, second) {
-        expectMsg(MemberUp(Member(node(third).address, MemberStatus.Up)))
-      }
     }
 
     enterBarrier("wait")
@@ -82,7 +60,6 @@ abstract class DubSubSyncSpec extends AbstractDubSubSpec {
       }
     }
 
-    Cluster(system).unsubscribe(testActor)
   }
 
 }
