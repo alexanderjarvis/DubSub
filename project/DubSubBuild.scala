@@ -8,7 +8,7 @@ object DubSubBuild extends Build {
   lazy val buildSettings = Defaults.defaultSettings ++ multiJvmSettings ++ Seq(
     name := "dubsub",
     organization := "uk.co.panaxiom",
-    version      := "0.1-SNAPSHOT",
+    version      := "0.2-SNAPSHOT",
     scalaVersion := "2.10.1",
     // make sure that the artifacts don't have the scala version in the name
     crossPaths   := false
