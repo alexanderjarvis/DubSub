@@ -40,7 +40,7 @@ class DubSub extends Actor with ActorLogging {
   var synced = false
   var syncWatch = IndexedSeq.empty[ActorRef]
 
-  def dubsub(member: Member) = context.actorFor(RootActorPath(member.address) / "user" / "DubSub")
+  def dubsub(member: Member) = context.actorSelection(self.path.toStringWithAddress(member.address))
 
   def receive = {
     case Subscribe(channel) => {
