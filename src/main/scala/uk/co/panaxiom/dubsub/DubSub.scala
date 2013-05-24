@@ -133,16 +133,19 @@ class DubSub extends Actor with ActorLogging {
 
 }
 
-case class Subscribe(channel: String)
-case class Unsubscribe(channel: String)
-case object Unsubscribe // require separate Set of ActorRef
-case class Publish(channel: String, message: String)
+@SerialVersionUID(1L) case class Subscribe(channel: String)
+@SerialVersionUID(1L) case class Unsubscribe(channel: String)
+@SerialVersionUID(1L) case object Unsubscribe
+@SerialVersionUID(1L) case class Publish(channel: String, message: String)
 
-private case object HubRegistration
-private case class HubSubscribe(channel: String)
-private case class HubUnsubscribe(channel: String)
-private case class HubPublish(channel: String, message: String)
+// For testing
+@SerialVersionUID(1L) case object HubSynced
 
-private case object HubSubscriptions
-private case class HubSubscriptions(subscriptions: Map[String, Set[ActorRef]])
-case object HubSynced
+// Private
+@SerialVersionUID(1L) private case object HubRegistration
+@SerialVersionUID(1L) private case class HubSubscribe(channel: String)
+@SerialVersionUID(1L) private case class HubUnsubscribe(channel: String)
+@SerialVersionUID(1L) private case class HubPublish(channel: String, message: String)
+@SerialVersionUID(1L) private case object HubSubscriptions
+@SerialVersionUID(1L) private case class HubSubscriptions(subscriptions: Map[String, Set[ActorRef]])
+
