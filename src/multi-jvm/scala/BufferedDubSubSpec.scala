@@ -22,41 +22,31 @@ import akka.cluster.MemberStatus
 
 import uk.co.panaxiom.dubsub._
 
-abstract class DubSubSyncSpec extends AbstractDubSubSpec {
+abstract class BufferedDubSubSpec extends AbstractDubSubSpec {
 
   import DubSubSpecConfig._
 
   "startup cluster" in within(15 seconds) {
-
-    runOn(first, second) {
-      Cluster(system) join node(first).address
-      system.actorOf(DubSub.props(bufferedPublishes = false), "DubSub")
-    }
-
-    testConductor.enter("first & second up")
+    Cluster(system) join node(first).address
+    system.actorOf(DubSub.props(bufferedPublishes = true), "DubSub")
+    testConductor.enter("all up")
   }
 
-  "sync subscriptions" in within(30 seconds) {
-
-    // subscribe on first node
+  "subscribe" in within(15 seconds) {
+    enterBarrier("subscribe")
     subscribe(first)
+    subscribe(second)
+    subscribe(third)
+  }
 
-    enterBarrier("wait")
-
-    // bring third node up and publish to first node
-    runOn(third) {
-      Cluster(system) join node(first).address
-      system.actorOf(DubSub.props(bufferedPublishes = false), "DubSub")
-    }
-    enterBarrier("3 joined")
-
-    awaitCount(1)
-
-    enterBarrier("finished")
+  "publish" in within(30 seconds) {
+    enterBarrier("publish")
+    publish(first)
+    expectPublish
   }
 
 }
 
-class DubSubSyncSpecMultiJvmNode1 extends DubSubSyncSpec
-class DubSubSyncSpecMultiJvmNode2 extends DubSubSyncSpec
-class DubSubSyncSpecMultiJvmNode3 extends DubSubSyncSpec
+class BufferedDubSubSpecMultiJvmNode1 extends BufferedDubSubSpec
+class BufferedDubSubSpecMultiJvmNode2 extends BufferedDubSubSpec
+class BufferedDubSubSpecMultiJvmNode3 extends BufferedDubSubSpec

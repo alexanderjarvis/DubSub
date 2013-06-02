@@ -30,7 +30,7 @@ abstract class DubSubSpec extends AbstractDubSubSpec {
 
     Cluster(system) join node(first).address
 
-    system.actorOf(Props[DubSub], "DubSub")
+    system.actorOf(DubSub.props(bufferedPublishes = false), "DubSub")
 
     testConductor.enter("all up")
   }
@@ -40,6 +40,7 @@ abstract class DubSubSpec extends AbstractDubSubSpec {
     subscribe(first)
     subscribe(second)
     subscribe(third)
+    awaitCount(3)
   }
 
   "publish" in within(15 seconds) {

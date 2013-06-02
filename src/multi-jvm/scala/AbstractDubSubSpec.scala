@@ -32,9 +32,18 @@ abstract class AbstractDubSubSpec extends MultiNodeSpec(DubSubSpecConfig)
 
   override def afterAll() = multiNodeSpecAfterAll()
 
+  def dubsub = system.actorSelection("/user/DubSub")
+
+  def awaitCount(count: Int) {
+    awaitAssert {
+      dubsub ! CountSubscriptions
+      expectMsgType[Int] must be(count)
+    }
+  }
+
   def subscribe(role: akka.remote.testconductor.RoleName) {
     runOn(role) {
-      val pubsub = system.actorFor(node(role) / "user" / "DubSub")
+      val pubsub = system.actorSelection(node(role) / "user" / "DubSub")
       pubsub ! Subscribe("topic")
       expectMsg(Subscribe("topic"))
     }
@@ -42,18 +51,20 @@ abstract class AbstractDubSubSpec extends MultiNodeSpec(DubSubSpecConfig)
 
   def publish(role: akka.remote.testconductor.RoleName) {
     runOn(role) {
-      val pubsub = system.actorFor(node(role) / "user" / "DubSub")
+      val pubsub = system.actorSelection(node(role) / "user" / "DubSub")
       pubsub ! Publish("topic", "message")
     }
   }
 
   def expectPublish {
-    expectMsg(Publish("topic", "message"))
+    awaitAssert {
+      expectMsg(Publish("topic", "message"))
+    }
   }
 
   def unsubscribe(role: akka.remote.testconductor.RoleName) {
     runOn(role) {
-      val pubsub = system.actorFor(node(role) / "user" / "DubSub")
+      val pubsub = system.actorSelection(node(role) / "user" / "DubSub")
       pubsub ! Unsubscribe("topic")
       expectMsg(Unsubscribe("topic"))
     }
