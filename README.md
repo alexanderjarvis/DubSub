@@ -38,7 +38,7 @@ There is a [Play plugin](https://github.com/alexanderjarvis/Play-DubSub) availab
 Add DubSub to your project in Build.scala
 
 ```scala
-libraryDependencies += "uk.co.panaxiom" % "dubsub" % "0.1-SNAPSHOT"
+libraryDependencies += "uk.co.panaxiom" % "dubsub" % "0.2-SNAPSHOT"
 
 resolvers += Resolver.url("Alex's GitHub Repository", url("http://alexanderjarvis.github.com/snapshots/"))(Resolver.ivyStylePatterns)
 ```
@@ -77,8 +77,8 @@ dubsub {
   akka {
     cluster {
       seed-nodes = [
-        "akka://DubSubSystem@127.0.0.1:2551",
-        "akka://DubSubSystem@127.0.0.1:2552"]
+        "akka.tcp://DubSubSystem@127.0.0.1:2551",
+        "akka.tcp://DubSubSystem@127.0.0.1:2552"]
     }
   }
 }
