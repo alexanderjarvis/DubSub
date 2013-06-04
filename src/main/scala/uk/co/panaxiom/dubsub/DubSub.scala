@@ -105,7 +105,7 @@ class DubSub(
     case MemberUp(member) => {
       nodes += member.address
     }
-    case MemberRemoved(member) => {
+    case MemberRemoved(member, previousStatus) => {
       if (member.address == cluster.selfAddress) {
         context stop self
       } else {
