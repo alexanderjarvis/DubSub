@@ -46,13 +46,15 @@ resolvers += Resolver.url("Alex's GitHub Repository", url("http://alexanderjarvi
 On application startup, create the DubSub ActorSystem and create a DubSub actor.
 
 ```scala
+import uk.co.panaxiom.dubsub._
+
 val system = ActorSystem("DubSubSystem", config.getConfig("dubsub"))
-system.actorOf(Props[DubSub], "DubSub")
+system.actorOf(DubSub.props(), "DubSub")
 ```
 
 Set the remote port of at least your first seed node as a runtime property (or in application.conf configuration)
 
-	-Ddubsub.akka.remote.netty.port=2551
+	-Ddubsub.akka.remote.netty.tcp.port=2551
 
 Send Publish, Subscribe and Unsubscribe messages from *any* node in your cluster and watch DubSub work seamlessly.
 
