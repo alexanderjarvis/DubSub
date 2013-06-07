@@ -120,16 +120,17 @@ class DubSub(
   private def subscribe(channel: String) {
     val lr = localRecepticle
     val nextLocalCount = lr.clock.counter + 1
+    val currentTime = System.currentTimeMillis
     val newLr = lr.copy(
-      clock = lr.clock.copy(counter = nextLocalCount, time = System.currentTimeMillis),
+      clock = lr.clock.copy(counter = nextLocalCount, time = currentTime),
       content = lr.content.get(channel).map { drop =>
         val newDrop = Drop(
           cluster.selfAddress,
-          VectorClock(nextLocalCount, System.currentTimeMillis),
+          VectorClock(nextLocalCount, currentTime),
           Some(drop.data.map(_ + sender).getOrElse(Set(sender))))
         lr.content.updated(channel, newDrop)
       }.getOrElse {
-        lr.content + (channel -> Drop(cluster.selfAddress, VectorClock(nextLocalCount, System.currentTimeMillis), Some(Set(sender))))
+        lr.content + (channel -> Drop(cluster.selfAddress, VectorClock(nextLocalCount, currentTime), Some(Set(sender))))
       }
     )
     nodeRecepticles += (cluster.selfAddress-> newLr)
@@ -138,11 +139,12 @@ class DubSub(
   private def unsubscribe(channel: String) {
     val lr = localRecepticle
     val nextLocalCount = lr.clock.counter + 1
+    val currentTime = System.currentTimeMillis
     lr.content.get(channel).map { drop =>
       nodeRecepticles += (cluster.selfAddress -> lr.copy(
-        clock = lr.clock.copy(counter = nextLocalCount, time = System.currentTimeMillis),
+        clock = lr.clock.copy(counter = nextLocalCount, time = currentTime),
         content = lr.content.updated(channel, drop.copy(
-          clock = drop.clock.copy(counter = nextLocalCount, time = System.currentTimeMillis()),
+          clock = drop.clock.copy(counter = nextLocalCount, time = currentTime),
           data = drop.data.map(_.filterNot(_ == sender))))
       ))
     }.getOrElse(log.error("Received Unsubscribe from channel {} which was not subscribed to", channel))
