@@ -1,5 +1,7 @@
 # DubSub - Distributed PubSub with Akka Cluster
 
+[![Build Status](https://travis-ci.org/alexanderjarvis/DubSub.png?branch=master)](https://travis-ci.org/alexanderjarvis/DubSub)
+
 ### Background
 
 PubSub, or [Publish-Subscribe](http://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) is a messaging pattern where the senders of messages (Publishers) have no knowledge of the receivers (Subscribers) and messages are instead categorised into 'topics' or 'channels', rather than being sent directly to specific receivers.
