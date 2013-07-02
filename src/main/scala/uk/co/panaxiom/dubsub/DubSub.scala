@@ -54,16 +54,18 @@ class DubSub(
 
   def dubsub(address: Address) = context.actorSelection(self.path.toStringWithAddress(address))
 
-  var publishBuffer = Buffer.empty[(Publish, Long)]
+  val publishBuffer = Buffer.empty[(Publish, Long)]
 
   def receive = {
-    case Subscribe(channel) => {
+    case msg @ Subscribe(channel) => {
       subscribe(channel)
-      sender ! Subscribe(channel)
+      context watch sender
+      sender ! msg
     }
-    case Unsubscribe(channel) => {
+    case msg @ Unsubscribe(channel) => {
       unsubscribe(channel)
-      sender ! Unsubscribe(channel)
+      context unwatch sender
+      sender ! msg
     }
     case p @ Publish(channel, message) => {
       if (bufferedPublishes) {
@@ -89,8 +91,8 @@ class DubSub(
         pour(recepticles)
       }
     }
-    case Spray => spray
-    case PullPlug => pullPlug
+    case Spray => spray()
+    case PullPlug => pullPlug()
     case CountSubscriptions => {
       val count = nodeRecepticles.map {
         case (_, recepticle) => recepticle.content.size
@@ -100,7 +102,7 @@ class DubSub(
 
     // ---- Cluster Specific ----
     case state: CurrentClusterState => {
-      nodes = state.members.filter(_.status == MemberStatus.Up).map(_.address)
+      nodes = state.members.collect { case m if m.status == MemberStatus.Up => m.address }
     }
     case MemberUp(member) => {
       nodes += member.address
@@ -114,10 +116,11 @@ class DubSub(
       }
     }
     case e: MemberEvent => //
+    case Terminated(ref) => terminated(ref)
     case _ => log.error("Received unknown message")
   }
 
-  private def subscribe(channel: String) {
+  private def subscribe(channel: String): Unit = {
     val lr = localRecepticle
     val nextLocalCount = lr.clock.counter + 1
     val currentTime = System.currentTimeMillis
@@ -136,7 +139,7 @@ class DubSub(
     nodeRecepticles += (cluster.selfAddress-> newLr)
   }
 
-  private def unsubscribe(channel: String) {
+  private def unsubscribe(channel: String): Unit = {
     val lr = localRecepticle
     val nextLocalCount = lr.clock.counter + 1
     val currentTime = System.currentTimeMillis
@@ -150,24 +153,35 @@ class DubSub(
     }.getOrElse(log.error("Received Unsubscribe from channel {} which was not subscribed to", channel))
   }
 
-  private def publishLocal(channel: String, message: String) {
-    localRecepticle.content.get(channel).map(_.data.map(_.foreach(sub => sub ! Publish(channel, message))))
+  private def terminated(actorRef: ActorRef): Unit = {
+    val lr = localRecepticle
+    val nextLocalCount = lr.clock.counter + 1
+    val currentTime = System.currentTimeMillis
+    nodeRecepticles += (cluster.selfAddress -> lr.copy(
+      clock = lr.clock.copy(counter = nextLocalCount, time = currentTime),
+      content = lr.content.filterNot { case (_, drop) => drop.data.map(_.contains(actorRef)).getOrElse(false) }
+    ))
   }
 
-  private def publishNodes(channel: String, message: String) {
+  private def publishLocal(channel: String, message: String): Unit = {
+    localRecepticle.content.get(channel).foreach(_.data.map(_.foreach(sub => sub ! Publish(channel, message))))
+  }
+
+  private def publishNodes(channel: String, message: String): Unit = {
     // todo: cache?
-    nodeRecepticles.filterNot {
-      case (address, recepticle) => address == cluster.selfAddress
-    }.foreach {
+    nodeRecepticles.foreach {
       case (address, recepticle) => {
-        recepticle.content.get(channel).map { _ =>
-          dubsub(address) ! NodePublish(channel, message)
+        if (address != cluster.selfAddress) {
+          val np = NodePublish(channel, message)
+          recepticle.content.get(channel).map { _ =>
+            dubsub(address) ! np
+          }
         }
       }
     }
   }
 
-  private def pour(recepticles: Iterable[Recepticle]) {
+  private def pour(recepticles: Iterable[Recepticle]): Unit = {
     var newRecepticles = recepticles.collect { case r if (r.clock.counter > nodeRecepticles(r.address).clock.counter) => r }
     var mergedRecepticles = newRecepticles.map { r =>
       val myRecepticle = nodeRecepticles(r.address)
@@ -223,11 +237,11 @@ class DubSub(
     }
   }
 
-  private def spray {
+  private def spray(): Unit = {
     randomNode.map(node => dubsub(node) ! WaterLevels(myLevels))
   }
 
-  private def pullPlug {
+  private def pullPlug(): Unit = {
     log.debug("Pulling plug")
     val drainExpiry = drainInterval.toMillis * 2
     nodeRecepticles.foreach {
