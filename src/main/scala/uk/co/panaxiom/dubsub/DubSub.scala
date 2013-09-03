@@ -74,6 +74,12 @@ class DubSub(
       publishLocal(channel, message)
       publishNodes(channel, message)
     }
+    case NumSubscribers(channel) => {
+      val subscribers = nodeRecepticles.map {
+        case (_, recepticle) => recepticle.content.collect { case (k, _) => k == channel }.size
+      }.sum
+      sender ! subscribers
+    }
 
     // ---- Node Specific ----
     case NodePublish(channel, message) => publishLocal(channel, message)
@@ -295,6 +301,7 @@ object DubSub {
 @SerialVersionUID(1L) case class Unsubscribe(channel: String)
 @SerialVersionUID(1L) case object Unsubscribe
 @SerialVersionUID(1L) case class Publish(channel: String, message: String)
+@SerialVersionUID(1L) case class NumSubscribers(channel: String)
 
 // For testing
 @SerialVersionUID(1L) case object CountSubscriptions

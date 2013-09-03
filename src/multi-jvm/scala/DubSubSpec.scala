@@ -41,6 +41,7 @@ abstract class DubSubSpec extends AbstractDubSubSpec {
     subscribe(second)
     subscribe(third)
     awaitCount(3)
+    awaitNumSubscribers("subscribe", 3)
   }
 
   "publish" in within(15 seconds) {

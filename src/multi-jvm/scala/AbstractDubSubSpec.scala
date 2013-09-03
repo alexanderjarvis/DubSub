@@ -41,6 +41,13 @@ abstract class AbstractDubSubSpec extends MultiNodeSpec(DubSubSpecConfig)
     }
   }
 
+  def awaitNumSubscribers(channel: String, count: Int) {
+    awaitAssert {
+      dubsub ! NumSubscribers(channel)
+      expectMsgType[Int] must be(count)
+    }
+  }
+
   def subscribe(role: akka.remote.testconductor.RoleName) {
     runOn(role) {
       val pubsub = system.actorSelection(node(role) / "user" / "DubSub")
