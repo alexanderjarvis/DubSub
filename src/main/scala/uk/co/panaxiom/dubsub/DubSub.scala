@@ -15,16 +15,14 @@
  */
 package uk.co.panaxiom.dubsub
 
+import scala.collection.mutable.Buffer
 import scala.concurrent.duration._
 import scala.concurrent.forkjoin.ThreadLocalRandom
-import scala.collection.mutable.Buffer
 
 import akka.actor._
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent._
-import akka.cluster.Member
 import akka.cluster.MemberStatus
-import akka.event.Logging
 
 class DubSub(
   sprayInterval: FiniteDuration,
