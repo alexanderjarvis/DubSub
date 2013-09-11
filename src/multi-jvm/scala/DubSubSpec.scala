@@ -47,6 +47,9 @@ abstract class DubSubSpec extends AbstractDubSubSpec {
     enterBarrier("publish")
     publish(first)
     expectPublish
+    runOn(first) {
+      expectMsg(Published(3))
+    }
   }
 
   "unsubscribe" in within(15 seconds) {

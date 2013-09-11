@@ -69,8 +69,9 @@ class DubSub(
       if (bufferedPublishes) {
         publishBuffer += Tuple2(p, System.currentTimeMillis)
       }
-      publishLocal(channel, message)
-      publishNodes(channel, message)
+      val pl = publishLocal(channel, message)
+      val pn = publishNodes(channel, message)
+      sender ! Published(pl + pn)
     }
     case NumSubscribers(channel) => {
       val subscribers = nodeRecepticles.map {
@@ -167,22 +168,30 @@ class DubSub(
     ))
   }
 
-  private def publishLocal(channel: String, message: String): Unit = {
-    localRecepticle.content.get(channel).foreach(_.data.map(_.foreach(sub => sub ! Publish(channel, message))))
+  private def publishLocal(channel: String, message: String): Int = {
+    var count = 0
+    localRecepticle.content.get(channel).foreach(_.data.map(_.foreach { sub =>
+      sub ! Publish(channel, message)
+      count += 1
+    }))
+    count
   }
 
-  private def publishNodes(channel: String, message: String): Unit = {
+  private def publishNodes(channel: String, message: String): Int = {
     // todo: cache?
+    var count = 0
     nodeRecepticles.foreach {
       case (address, recepticle) => {
         if (address != cluster.selfAddress) {
           val np = NodePublish(channel, message)
-          recepticle.content.get(channel).map { _ =>
+          recepticle.content.get(channel).foreach { drop =>
             dubsub(address) ! np
+            count += drop.data.map(_.size).getOrElse(0)
           }
         }
       }
     }
+    count
   }
 
   private def pour(recepticles: Iterable[Recepticle]): Unit = {
@@ -218,7 +227,7 @@ class DubSub(
         val content = recepticle.content.filter {
           case (_, drop) => drop.clock.counter > height
         }
-        recepticle.copy(content = content.map { case (key, drop) => (key, drop.copy(data = None)) })
+        recepticle.copy(content = content)
       }
     }
   }
@@ -299,6 +308,7 @@ object DubSub {
 @SerialVersionUID(1L) case class Unsubscribe(channel: String)
 @SerialVersionUID(1L) case object Unsubscribe
 @SerialVersionUID(1L) case class Publish(channel: String, message: String)
+@SerialVersionUID(1L) case class Published(subs: Int)
 @SerialVersionUID(1L) case class NumSubscribers(channel: String)
 
 // For testing
