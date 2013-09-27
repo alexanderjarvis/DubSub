@@ -75,7 +75,7 @@ class DubSub(
     }
     case NumSubscribers(channel) => {
       val subscribers = nodeRecepticles.map {
-        case (_, recepticle) => recepticle.content.collect { case (k, d) if k == channel => d.data.map(_.size).getOrElse(0) }.sum
+        case (_, recepticle) => recepticle.content.collect { case (k, d) if k == channel => d.count }.sum
       }.sum
       sender ! subscribers
     }
