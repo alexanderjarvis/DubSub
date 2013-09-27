@@ -173,22 +173,24 @@ class DubSub(
 
   private def publishLocal(channel: String, message: String): Int = {
     var count = 0
-    localRecepticle.content.get(channel).foreach(_.data.map(_.foreach { sub =>
-      sub ! Publish(channel, message)
-      count += 1
-    }))
+    val publish = Publish(channel, message)
+    localRecepticle.content.get(channel).foreach { drop =>
+      drop.data.map(_.foreach { sub =>
+        sub ! publish
+      })
+      count += drop.count
+    }
     count
   }
 
   private def publishNodes(channel: String, message: String): Int = {
-    // todo: cache?
     var count = 0
+    val nodePublish = NodePublish(channel, message)
     nodeRecepticles.foreach {
       case (address, recepticle) => {
         if (address != cluster.selfAddress) {
-          val np = NodePublish(channel, message)
           recepticle.content.get(channel).foreach { drop =>
-            dubsub(address) ! np
+            dubsub(address) ! nodePublish
             count += drop.count
           }
         }
