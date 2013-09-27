@@ -132,13 +132,14 @@ class DubSub(
     val newLr = lr.copy(
       clock = lr.clock.copy(counter = nextLocalCount, time = currentTime),
       content = lr.content.get(channel).map { drop =>
+        val dropData = drop.data.map(_ + sender).getOrElse(Set(sender))
         val newDrop = Drop(
-          cluster.selfAddress,
           VectorClock(nextLocalCount, currentTime),
-          Some(drop.data.map(_ + sender).getOrElse(Set(sender))))
+          Some(dropData),
+          dropData.size)
         lr.content.updated(channel, newDrop)
       }.getOrElse {
-        lr.content + (channel -> Drop(cluster.selfAddress, VectorClock(nextLocalCount, currentTime), Some(Set(sender))))
+        lr.content + (channel -> Drop(VectorClock(nextLocalCount, currentTime), Some(Set(sender)), 1))
       }
     )
     nodeRecepticles += (cluster.selfAddress-> newLr)
@@ -149,11 +150,13 @@ class DubSub(
     val nextLocalCount = lr.clock.counter + 1
     val currentTime = System.currentTimeMillis
     lr.content.get(channel).map { drop =>
+      val dropData = drop.data.map(_.filterNot(_ == sender))
       nodeRecepticles += (cluster.selfAddress -> lr.copy(
         clock = lr.clock.copy(counter = nextLocalCount, time = currentTime),
         content = lr.content.updated(channel, drop.copy(
           clock = drop.clock.copy(counter = nextLocalCount, time = currentTime),
-          data = drop.data.map(_.filterNot(_ == sender))))
+          data = dropData,
+          count = dropData.map(_.size).getOrElse(0)))
       ))
     }.getOrElse(log.error("Received Unsubscribe from channel {} which was not subscribed to", channel))
   }
@@ -186,7 +189,7 @@ class DubSub(
           val np = NodePublish(channel, message)
           recepticle.content.get(channel).foreach { drop =>
             dubsub(address) ! np
-            count += drop.data.map(_.size).getOrElse(0)
+            count += drop.count
           }
         }
       }
@@ -200,7 +203,8 @@ class DubSub(
       val myRecepticle = nodeRecepticles(r.address)
       (r.address -> myRecepticle.copy(
           clock = myRecepticle.clock.copy(counter = r.clock.counter, time = r.clock.time),
-          content = myRecepticle.content ++ r.content)) }
+          content = myRecepticle.content ++ r.content))
+    }
     nodeRecepticles ++= mergedRecepticles
 
     if (bufferedPublishes) {
@@ -227,7 +231,7 @@ class DubSub(
         val content = recepticle.content.filter {
           case (_, drop) => drop.clock.counter > height
         }
-        recepticle.copy(content = content)
+        recepticle.copy(content = content.map { case (key, drop) => (key, drop.copy(data = None)) })
       }
     }
   }
@@ -294,7 +298,7 @@ object DubSub {
     @SerialVersionUID(1L) case object PullPlug
 
     @SerialVersionUID(1L) case class VectorClock(counter: Long, time: Long)
-    @SerialVersionUID(1L) case class Drop(address: Address, clock: VectorClock, data: Option[Set[ActorRef]])
+    @SerialVersionUID(1L) case class Drop(clock: VectorClock, data: Option[Set[ActorRef]], count: Int)
     @SerialVersionUID(1L) case class Recepticle(address: Address, clock: VectorClock, content: Map[String, Drop])
     @SerialVersionUID(1L) case class WaterLevels(levels: Map[Address, Long])
     @SerialVersionUID(1L) case class Pour(recepticles: Iterable[Recepticle])
