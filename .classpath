@@ -1,0 +1,24 @@
+<classpath>
+  <classpathentry output="target/classes" path="src/main/scala" kind="src"></classpathentry>
+  <classpathentry output="target/classes" path="src/main/java" kind="src"></classpathentry>
+  <classpathentry output="target/test-classes" path="src/test/scala" kind="src"></classpathentry>
+  <classpathentry output="target/test-classes" path="src/test/java" kind="src"></classpathentry>
+  <classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/com.typesafe.akka/akka-actor_2.10/jars/akka-actor_2.10-2.2.1.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/com.typesafe/config/bundles/config-1.0.2.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/com.typesafe.akka/akka-remote_2.10/bundles/akka-remote_2.10-2.2.1.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/io.netty/netty/bundles/netty-3.6.6.Final.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/com.google.protobuf/protobuf-java/jars/protobuf-java-2.4.1.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/org.uncommons.maths/uncommons-maths/jars/uncommons-maths-1.2.2a.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/com.typesafe.akka/akka-cluster_2.10/bundles/akka-cluster_2.10-2.2.1.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/net.sandrogrzicic/scalabuff-runtime_2.10/jars/scalabuff-runtime_2.10-1.2.0.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/com.typesafe.akka/akka-slf4j_2.10/bundles/akka-slf4j_2.10-2.2.1.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.2.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/com.typesafe.akka/akka-multi-node-testkit_2.10/jars/akka-multi-node-testkit_2.10-2.2.1.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/com.typesafe.akka/akka-testkit_2.10/bundles/akka-testkit_2.10-2.2.1.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/org.scalatest/scalatest_2.10/jars/scalatest_2.10-1.9.1.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/org.scala-lang/scala-actors/jars/scala-actors-2.10.0.jar" kind="lib"></classpathentry>
+  <classpathentry path="/Users/alex/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.10.0.jar" kind="lib"></classpathentry>
+  <classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"></classpathentry>
+  <classpathentry path="bin" kind="output"></classpathentry>
+</classpath>
