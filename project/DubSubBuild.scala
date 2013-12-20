@@ -29,9 +29,15 @@ object DubSubBuild extends Build {
     // make sure that MultiJvm tests are executed by the default test target
     executeTests in Test <<=
       ((executeTests in Test), (executeTests in MultiJvm)) map {
-        case ((_, testResults), (_, multiJvmResults))  =>
-          val results = testResults ++ multiJvmResults
-          (Tests.overall(results.values), results)
+        case ((testResults), (multiJvmResults)) =>
+          val overall =
+            if (testResults.overall.id < multiJvmResults.overall.id)
+              multiJvmResults.overall
+            else
+              testResults.overall
+          Tests.Output(overall,
+            testResults.events ++ multiJvmResults.events,
+            testResults.summaries ++ multiJvmResults.summaries)
     }
   )
 
