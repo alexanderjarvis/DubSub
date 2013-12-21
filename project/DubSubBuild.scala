@@ -51,7 +51,7 @@ object DubSubBuild extends Build {
 
       // ---- test dependencies ----
       "com.typesafe.akka" %% "akka-multi-node-testkit" % "2.2.3",
-      "org.scalatest"     %% "scalatest" % "2.0" % "test"
+      "org.scalatest"     %% "scalatest" % "1.9.1" % "test"
     )
   }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import org.scalatest.BeforeAndAfterAll
-import org.scalatest.WordSpecLike
+import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
 import akka.remote.testkit.MultiNodeSpec
 import akka.testkit.ImplicitSender
@@ -22,8 +22,8 @@ import akka.actor._
 
 import uk.co.panaxiom.dubsub._
 
-abstract class AbstractDubSubSpec extends MultiNodeSpec(DubSubSpecConfig)
-  with WordSpecLike with MustMatchers with BeforeAndAfterAll
+class AbstractDubSubSpec extends MultiNodeSpec(DubSubSpecConfig)
+  with WordSpec with MustMatchers with BeforeAndAfterAll
   with ImplicitSender {
 
   override def initialParticipants = roles.size
