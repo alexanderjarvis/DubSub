@@ -40,7 +40,7 @@ There is a [Play plugin](https://github.com/alexanderjarvis/Play-DubSub) availab
 Add DubSub to your project in Build.scala
 
 ```scala
-libraryDependencies += "uk.co.panaxiom" % "dubsub" % "0.2-SNAPSHOT"
+libraryDependencies += "uk.co.panaxiom" % "dubsub" % "0.3-SNAPSHOT"
 
 resolvers += Resolver.url("Alex's GitHub Repository", url("http://alexanderjarvis.github.com/snapshots/"))(Resolver.ivyStylePatterns)
 ```
