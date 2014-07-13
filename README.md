@@ -40,7 +40,7 @@ There is a [Play plugin](https://github.com/alexanderjarvis/Play-DubSub) availab
 Add DubSub to your project in Build.scala
 
 ```scala
-libraryDependencies += "uk.co.panaxiom" % "dubsub" % "0.3-SNAPSHOT"
+libraryDependencies += "uk.co.panaxiom" % "dubsub" % "0.4-SNAPSHOT"
 
 resolvers += Resolver.url("Alex's GitHub Repository", url("http://alexanderjarvis.github.com/snapshots/"))(Resolver.ivyStylePatterns)
 ```
@@ -90,9 +90,11 @@ dubsub {
 
 ## How to run the tests
 
-DubSub uses the sbt-multi-jvm plugin to perform tests across multiple JVMs and so requires a special command to run the tests:
+Just run the test command in sbt:
 
 ```
 $ sbt
-> multi-jvm:test
+> test
 ```
+
+DubSub uses the sbt-multi-jvm plugin to perform tests across multiple JVMs.
