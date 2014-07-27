@@ -42,7 +42,7 @@ Add DubSub to your project in Build.scala
 ```scala
 libraryDependencies += "uk.co.panaxiom" % "dubsub" % "0.4-SNAPSHOT"
 
-resolvers += Resolver.url("Alex's GitHub Repository", url("http://alexanderjarvis.github.com/snapshots/"))(Resolver.ivyStylePatterns)
+resolvers += Resolver.url("Alex's GitHub Repository", url("http://alexanderjarvis.github.io/snapshots/"))(Resolver.ivyStylePatterns)
 ```
 
 On application startup, create the DubSub ActorSystem and create a DubSub actor.
