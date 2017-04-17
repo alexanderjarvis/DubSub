@@ -35,7 +35,7 @@ This means that you can effectively cut out the middle man and so in comparison 
 
 There is a [Play plugin](https://github.com/alexanderjarvis/Play-DubSub) available, which makes it very easy to get started if you are using this web framework.
 
-#####Otherwise you can integrate DubSub into any Scala application:
+##### Otherwise you can integrate DubSub into any Scala application:
 
 Add DubSub to your project in Build.scala
 
